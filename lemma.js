@@ -5,9 +5,9 @@ var util = require('util'),
 
 module.exports = findLemmas;
 
-var morfdir = pathlib.join("C:","morf"),
-    morfpath = pathlib.join(morfdir, "ESTMORF.EXE"),
-    tempdir = "E:";
+module.exports.morfdir = pathlib.join("C:","morf");
+module.exports.morfpath = pathlib.join(module.exports.morfdir, "ESTMORF.EXE");
+module.exports.tempdir = "E:";
 
 function findLemmas(words, callback){
     var word, fname, fpath, output;
@@ -34,7 +34,7 @@ function findLemmas(words, callback){
     }
 
     fname = genFName();
-    fpath = pathlib.join(tempdir, fname);
+    fpath = pathlib.join(module.exports.tempdir, fname);
 
     output = convertToWin1257(words.join("\n"));
 
@@ -47,8 +47,8 @@ function findLemmas(words, callback){
 }
 
 function makeLemma(fpath, callback){
-    exec(morfpath + ' -B "' + fpath+'.txt"',{
-            cwd: morfdir
+    exec(module.exports.morfpath + ' -B "' + fpath+'.txt"',{
+            cwd: module.exports.morfdir
         },
         function (err, stdout, stderr) {
             if(err){
