@@ -152,7 +152,7 @@ function convertFromWin1257(buf){
                 }
                 break;
         }
-        c[c.length] = ch;
+        c[c.length] = String.fromCharCode(ch);
     }
-    return String.fromCharCode.apply(String, c);
+    return c.join("");
 }
