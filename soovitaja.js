@@ -8,8 +8,9 @@ module.exports.checkQuery = checkQuery;
 module.exports.queryCheck = queryCheck;
 
 function queryCheck(query, callback){
+    query = (query || "").toString("utf-8");
+
     checkQuery(query, function(err, data){
-        query = (query || "").toString("utf-8");
 
         if(err){
             console.log(err.message);

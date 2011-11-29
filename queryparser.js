@@ -76,7 +76,7 @@ function queryParser(query){
         if(words[i].match(/^[a-zA-ZöäõüšžÕÄÖÜŠŽ]/) && !words[i].match(/[\?\*\:]/) && skiplist.indexOf(words[i].toLowerCase())<0){
             if(words[i].match(/^[A-ZÕÄÖÜŠŽ\-]+$/)){
                 txtcase = "allcaps";
-            }else if(querywords[i].match(/^[A-ZÕÄÖÜŠŽ\-]+/)){
+            }else if(words[i].match(/^[A-ZÕÄÖÜŠŽ\-]+/)){
                 txtcase = "firstcaps";
             }else{
                 txtcase = "lower";
