@@ -1,40 +1,59 @@
 var fs = require("fs"),
     exec = require('child_process').exec,
-    pathlib = require("path");
-
-module.exports.morfdir = pathlib.join("C:","morf");
-module.exports.morfpath = pathlib.join(module.exports.morfdir, "ESTMORF.EXE");
-module.exports.tempdir = "E:";
+    pathlib = require("path"),
+    queryparser = require("./queryparser"),
+    lemma = require("./lemma");
 
 module.exports.checkQuery = checkQuery;
+module.exports.queryCheck = queryCheck;
+
+function queryCheck(query, callback){
+    checkQuery(query, function(err, data){
+        query = (query || "").toString("utf-8");
+
+        if(err){
+            console.log(err.message);
+            console.log(err.stack);
+            return callback(err);
+        }
+
+        if(!data.fixed || !data.fixed.length){
+            console.log("Kõik õige!");
+            return callback(null, {
+                query: query
+            });
+        }
+
+        var s1, s2, i, len;
+
+        s1 = data.words.join("");
+
+        for(var i=0, len = data.words.length; i<len; i++){
+            data.words[i] = data.words[i].replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+        }
+
+        for(var i=0, len=data.fixed.length; i<len; i++){
+            data.words[data.fixed[i]] = "<strong>" + data.words[data.fixed[i]] + "</strong>";
+        }
+
+        s2 = data.words.join("");
+
+
+        return callback(null, {
+            query: query,
+            fixed: s1, 
+            html: s2
+        });
+
+    });
+
+}
 
 function checkQuery(query, callback){
 
-    var querywords = query.replace(/\s+/g," ").
-            replace(/[:]\s*/g,": ").
-            replace(/([a-zA-ZõäöüšžÕÄÖÜŠŽ\-]+)/g,"\t$1\t").split("\t"),
-        i, len, querytree = [], txtcase, morftext=[];
+    var parsedQuery = queryparser(query);
 
-    for(i=1, len = querywords.length; i<len-1; i+=2){
-        
-        if(querywords[i].match(/^[A-ZÕÄÖÜŠŽ\-]+$/)){
-            txtcase = "allcaps";
-        }else if(querywords[i].match(/^[A-ZÕÄÖÜŠŽ\-]+/)){
-            txtcase = "firstcaps";
-        }else{
-            txtcase = "lower";
-        }
-
-        querytree.push({
-            word: querywords[i],
-            pos: i,
-            txtcase: txtcase
-        });
-
-        morftext.push(querywords[i]);
-    }
-
-    morfSoovitaja(morftext, function(err, body){
+    morfSoovitaja(parsedQuery.list, function(err, body){
     
         if(err){
             return callback(err);
@@ -67,7 +86,7 @@ function checkQuery(query, callback){
             }
         });
 
-        querytree.forEach(function(word){
+        parsedQuery.map.forEach(function(word){
             if((currentWord = wordlist[word.word.toLowerCase()]) && currentWord.toLowerCase() != word.word.toLowerCase()){
                 switch(word.txtcase){
                     case "allcaps":
@@ -77,17 +96,19 @@ function checkQuery(query, callback){
                         currentWord = currentWord.toLowerCase();
                         currentWord = currentWord.substr(0,1).toUpperCase() + currentWord.substr(1);
                         break;
+                    default:
+                        currentWord = currentWord.toLowerCase();
                 }
                 fixed.push(word.pos);
             }else{
                 currentWord = word.word;
             }
 
-            querywords[word.pos] = currentWord;
+            parsedQuery.words[word.pos] = currentWord;
         });
 
         callback(null, {
-            words: querywords,
+            words: parsedQuery.words,
             fixed: fixed
         });
     });
@@ -96,7 +117,7 @@ function checkQuery(query, callback){
 function morfSoovitaja(words, callback){
     fname = genFName();
 
-    fpath = pathlib.join(module.exports.tempdir, fname);
+    fpath = pathlib.join(lemma.tempdir, fname);
 
     output = convertToWin1257(words.join("\n"));
 
@@ -104,8 +125,8 @@ function morfSoovitaja(words, callback){
         if(err){
             return callback(err);
         }
-        exec(module.exports.morfpath + ' -X "' + fpath+'.txt"',{
-                cwd: module.exports.morfdir
+        exec(lemma.morfpath + ' -X "' + fpath+'.txt"',{
+                cwd: lemma.morfdir
             },
             function (err, stdout, stderr) {
                 if(err){

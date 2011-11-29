@@ -3,11 +3,16 @@ var util = require('util'),
     fs = require("fs"),
     pathlib = require("path");
 
-module.exports = findLemmas;
 
-module.exports.morfdir = pathlib.join("C:","morf");
+module.exports.morfdir = pathlib.join("C:","lemma", "morf");
 module.exports.morfpath = pathlib.join(module.exports.morfdir, "ESTMORF.EXE");
-module.exports.tempdir = "E:";
+module.exports.tempdir = "R:";
+
+var soovitaja = require("./soovitaja");
+
+module.exports = findLemmas;
+module.exports.queryCheck = soovitaja.queryCheck;
+
 
 function findLemmas(words, callback){
     var word, fname, fpath, output;
