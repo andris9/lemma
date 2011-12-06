@@ -3,7 +3,6 @@ var util = require('util'),
     fs = require("fs"),
     pathlib = require("path");
 
-
 module.exports.morfdir = pathlib.join("C:","lemma", "morf");
 module.exports.morfpath = pathlib.join(module.exports.morfdir, "ESTMORF.EXE");
 module.exports.tempdir = "R:";
