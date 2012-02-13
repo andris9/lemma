@@ -14,13 +14,16 @@
         "type" : "git",
         "url" : "http://github.com/andris9/lemma.git"
     },
-    "main" : "./lemma",
+    "main" : "./index",
     "licenses" : [
         {
             "type": "MIT",
             "url": "http://github.com/andris9/lemma/blob/master/LICENSE"
         }
     ],
+    "dependencies":{
+        "node-gearman": "*"
+    },
     "engine": [ "node >=0.3.0" ],
     "keywords": ["lemma", "estmorf"]
 }

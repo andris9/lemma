@@ -1,18 +1,15 @@
 var util = require('util'),
     exec = require('child_process').exec,
     fs = require("fs"),
-    pathlib = require("path");
+    pathlib = require("path"),
+    helpers = require("./helpers");
 
+module.exports.findLemmas = findLemmas;
 
-module.exports.morfdir = pathlib.join("C:","lemma", "morf");
-module.exports.morfpath = pathlib.join(module.exports.morfdir, "ESTMORF.EXE");
-module.exports.tempdir = "R:";
-
-var soovitaja = require("./soovitaja");
-
-module.exports = findLemmas;
-module.exports.queryCheck = soovitaja.queryCheck;
-
+module.exports.config = {
+    morfdir: pathlib.join("C:","lemma", "morf");
+    tempdir: "R:"
+};
 
 function findLemmas(words, callback){
     var word, fname, fpath, output;
@@ -39,7 +36,7 @@ function findLemmas(words, callback){
     }
 
     fname = genFName();
-    fpath = pathlib.join(module.exports.tempdir, fname);
+    fpath = pathlib.join(module.exports.config.tempdir, fname);
 
     output = convertToWin1257(words.join("\n"));
 
@@ -52,8 +49,10 @@ function findLemmas(words, callback){
 }
 
 function makeLemma(fpath, callback){
-    exec(module.exports.morfpath + ' -B "' + fpath+'.txt"',{
-            cwd: module.exports.morfdir
+    var morfpath = pathlib.join(module.exports.config.morfdir, "ESTMORF.EXE");
+
+    exec(morfpath + ' -B "' + fpath+'.txt"',{
+            cwd: module.exports.config.morfdir
         },
         function (err, stdout, stderr) {
             if(err){
@@ -92,72 +91,4 @@ function parseLemma(lemmatxt, callback){
     }
 
     callback(null, words);
-}
-
-/* HELPER FUNCTIONS */
-
-function genFName(){
-    return genFName.seed+"-"+(genFName.counter++);
-}
-genFName.seed = "T"+Date.now();
-genFName.counter = 0;
-
-function convertToWin1257(str){
-    var c = [], ch, buf, lastCh;
-    for(var i=0, len=str.length;i<len; i++){
-        ch = str.charCodeAt(i);
-        switch(ch){
-            case 382: // ž
-                ch = 254;
-                break;
-            case 381: // Ž
-                ch = 222;
-                break;
-            case 353: // š
-                ch = 240;
-                break;
-            case 352: // š
-                ch = 208;
-                break;
-            case 0X0A: // insert \r before \n
-                if(lastCh != 0x0D){
-                    c[c.length] = 0x0D;
-                }
-        }
-        c[c.length] = ch;
-        lastCh = ch;
-    }
-    buf = new Buffer(c);
-
-    return buf;
-}
-
-function convertFromWin1257(buf){
-    var c = [], ch;
-    for(var i=0, len = buf.length; i<len; i++){
-        ch = buf[i];
-        switch(ch){
-            case 254:
-                ch = 382;
-                break;
-            case 222:
-                ch = 381;
-                break;
-            case 240:
-                ch = 353;
-                break;
-            case 208:
-                ch = 352;
-                break;
-            case 0X0D: // remove \r
-                if(buf.length>i+1 && buf[i+1] == 0x0A){
-                    continue;
-                }else{
-                    ch = 0x0A;
-                }
-                break;
-        }
-        c[c.length] = String.fromCharCode(ch);
-    }
-    return c.join("");
 }
