@@ -1,5 +1,4 @@
-var lemma = require("./lemma"),
-	server = require("./server");
+var lemma = require("./lemma");
 
 
 module.exports.config = lemma.config;

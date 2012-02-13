@@ -7,7 +7,7 @@ var util = require('util'),
 module.exports.findLemmas = findLemmas;
 
 module.exports.config = {
-    morfdir: pathlib.join("C:","lemma", "morf");
+    morfdir: pathlib.join("C:","lemma", "morf"),
     tempdir: "R:"
 };
 
@@ -35,10 +35,10 @@ function findLemmas(words, callback){
         return callback();
     }
 
-    fname = genFName();
+    fname = helpers.genFName();
     fpath = pathlib.join(module.exports.config.tempdir, fname);
 
-    output = convertToWin1257(words.join("\n"));
+    output = helpers.convertToWin1257(words.join("\n"));
 
     fs.writeFile(fpath+".txt", output, function(err){
         if(err){
@@ -63,7 +63,7 @@ function makeLemma(fpath, callback){
                 fs.unlink(fpath+".txt");
                 fs.unlink(fpath+".mrf");
 
-                var lemmatxt = (convertFromWin1257(data) || "").toString("utf-8").trim();
+                var lemmatxt = (helpers.convertFromWin1257(data) || "").toString("utf-8").trim();
                 
                 parseLemma(lemmatxt, callback);
             });
