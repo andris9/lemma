@@ -1,7 +1,7 @@
 {
     "name": "lemma",
     "description": "Wrapper for ESTMOFR to find lemmas for estonian words",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "author" : "Andris Reinman",
     "maintainers":[
         {
